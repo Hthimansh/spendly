@@ -65,6 +65,13 @@ def seed_db():
         )
 
 
+def get_user_by_email(email):
+    with get_db() as conn:
+        return conn.execute(
+            "SELECT * FROM users WHERE email = ?", (email,)
+        ).fetchone()
+
+
 def create_user(name, email, password):
     from werkzeug.security import generate_password_hash
     password_hash = generate_password_hash(password)
