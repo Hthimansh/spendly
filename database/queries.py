@@ -1,0 +1,72 @@
+from database.db import get_db
+
+
+def get_user_by_id(user_id):
+    with get_db() as conn:
+        return conn.execute(
+            "SELECT * FROM users WHERE id = ?", (user_id,)
+        ).fetchone()
+
+
+def get_recent_transactions(user_id):
+    with get_db() as conn:
+        rows = conn.execute(
+            "SELECT date, description, category, amount "
+            "FROM expenses WHERE user_id = ? ORDER BY date DESC",
+            (user_id,)
+        ).fetchall()
+    from datetime import datetime
+    result = []
+    for r in rows:
+        d = datetime.strptime(r["date"], "%Y-%m-%d")
+        result.append({
+            "date":        d.strftime("%b %d"),
+            "description": r["description"],
+            "category":    r["category"],
+            "amount":      f"₹{r['amount']:.2f}",
+        })
+    return result
+
+
+def get_summary_stats(user_id):
+    with get_db() as conn:
+        rows = conn.execute(
+            "SELECT amount, category FROM expenses WHERE user_id = ?",
+            (user_id,)
+        ).fetchall()
+    if not rows:
+        return {"total_spent": "₹0.00", "transaction_count": 0, "top_category": "—"}
+    total = sum(r["amount"] for r in rows)
+    cat_totals = {}
+    for r in rows:
+        cat_totals[r["category"]] = cat_totals.get(r["category"], 0) + r["amount"]
+    top = max(cat_totals, key=cat_totals.get)
+    return {
+        "total_spent":       f"₹{total:.2f}",
+        "transaction_count": len(rows),
+        "top_category":      top,
+    }
+
+
+def get_category_breakdown(user_id):
+    with get_db() as conn:
+        rows = conn.execute(
+            "SELECT amount, category FROM expenses WHERE user_id = ?",
+            (user_id,)
+        ).fetchall()
+    if not rows:
+        return []
+    cat_totals = {}
+    for r in rows:
+        cat_totals[r["category"]] = cat_totals.get(r["category"], 0) + r["amount"]
+    grand = sum(cat_totals.values())
+    breakdown = sorted(
+        [{"name": k, "raw": v} for k, v in cat_totals.items()],
+        key=lambda x: x["raw"], reverse=True
+    )
+    result = [{"name": c["name"], "amount": f"₹{c['raw']:.2f}",
+               "pct": round(c["raw"] / grand * 100)} for c in breakdown]
+    diff = 100 - sum(c["pct"] for c in result)
+    if result:
+        result[0]["pct"] += diff
+    return result
