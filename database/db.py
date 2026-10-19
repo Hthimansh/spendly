@@ -63,3 +63,17 @@ def seed_db():
             " VALUES (?, ?, ?, ?, ?)",
             expenses,
         )
+
+
+def create_user(name, email, password):
+    from werkzeug.security import generate_password_hash
+    password_hash = generate_password_hash(password)
+    with get_db() as conn:
+        conn.execute(
+            "INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)",
+            (name, email, password_hash),
+        )
+        row = conn.execute(
+            "SELECT id FROM users WHERE email = ?", (email,)
+        ).fetchone()
+    return row["id"]
