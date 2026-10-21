@@ -3,6 +3,15 @@ from werkzeug.security import check_password_hash
 from database.db import get_db, init_db, seed_db, create_user, get_user_by_email
 from database.queries import get_user_by_id, get_summary_stats, get_recent_transactions, get_category_breakdown
 import sqlite3
+from datetime import datetime, date, timedelta
+
+
+def _parse_date(s):
+    try:
+        datetime.strptime(s, "%Y-%m-%d")
+        return s
+    except (ValueError, TypeError):
+        return None
 
 app = Flask(__name__)
 app.secret_key = "dev-secret-change-in-prod"
@@ -105,7 +114,6 @@ def profile():
     if user is None:
         abort(404)
 
-    from datetime import datetime
     created = datetime.strptime(user["created_at"][:10], "%Y-%m-%d")
     name = user["name"]
     initials = "".join(p[0].upper() for p in name.split()[:2])
@@ -116,12 +124,28 @@ def profile():
         "member_since": created.strftime("%B %Y"),
     }
 
+    date_from = _parse_date(request.args.get("from", "").strip())
+    date_to   = _parse_date(request.args.get("to", "").strip())
+
+    today          = date.today()
+    month_start    = today.replace(day=1)
+    last_month_end = month_start - timedelta(days=1)
+
+    date_presets = [
+        {"label": "This Month",    "date_from": month_start.isoformat(),                   "date_to": today.isoformat()},
+        {"label": "Last Month",    "date_from": last_month_end.replace(day=1).isoformat(),  "date_to": last_month_end.isoformat()},
+        {"label": "Last 3 Months", "date_from": (today - timedelta(days=90)).isoformat(),   "date_to": today.isoformat()},
+    ]
+
     return render_template(
         "profile.html",
         user_info=user_info,
-        stats=get_summary_stats(user_id),
-        transactions=get_recent_transactions(user_id),
-        categories=get_category_breakdown(user_id),
+        stats=get_summary_stats(user_id, date_from=date_from, date_to=date_to),
+        transactions=get_recent_transactions(user_id, date_from=date_from, date_to=date_to),
+        categories=get_category_breakdown(user_id, date_from=date_from, date_to=date_to),
+        filter_from=date_from or "",
+        filter_to=date_to or "",
+        date_presets=date_presets,
     )
 
 
