@@ -1,4 +1,17 @@
 from database.db import get_db
+from datetime import datetime
+
+
+def _date_where(user_id, date_from, date_to):
+    clauses = ["user_id = ?"]
+    params  = [user_id]
+    if date_from:
+        clauses.append("date >= ?")
+        params.append(date_from)
+    if date_to:
+        clauses.append("date <= ?")
+        params.append(date_to)
+    return " AND ".join(clauses), params
 
 
 def get_user_by_id(user_id):
@@ -8,14 +21,14 @@ def get_user_by_id(user_id):
         ).fetchone()
 
 
-def get_recent_transactions(user_id):
+def get_recent_transactions(user_id, date_from=None, date_to=None):
+    where, params = _date_where(user_id, date_from, date_to)
     with get_db() as conn:
         rows = conn.execute(
-            "SELECT date, description, category, amount "
-            "FROM expenses WHERE user_id = ? ORDER BY date DESC",
-            (user_id,)
+            f"SELECT date, description, category, amount "
+            f"FROM expenses WHERE {where} ORDER BY date DESC",
+            params
         ).fetchall()
-    from datetime import datetime
     result = []
     for r in rows:
         d = datetime.strptime(r["date"], "%Y-%m-%d")
@@ -28,11 +41,12 @@ def get_recent_transactions(user_id):
     return result
 
 
-def get_summary_stats(user_id):
+def get_summary_stats(user_id, date_from=None, date_to=None):
+    where, params = _date_where(user_id, date_from, date_to)
     with get_db() as conn:
         rows = conn.execute(
-            "SELECT amount, category FROM expenses WHERE user_id = ?",
-            (user_id,)
+            f"SELECT amount, category FROM expenses WHERE {where}",
+            params
         ).fetchall()
     if not rows:
         return {"total_spent": "₹0.00", "transaction_count": 0, "top_category": "—"}
@@ -48,11 +62,12 @@ def get_summary_stats(user_id):
     }
 
 
-def get_category_breakdown(user_id):
+def get_category_breakdown(user_id, date_from=None, date_to=None):
+    where, params = _date_where(user_id, date_from, date_to)
     with get_db() as conn:
         rows = conn.execute(
-            "SELECT amount, category FROM expenses WHERE user_id = ?",
-            (user_id,)
+            f"SELECT amount, category FROM expenses WHERE {where}",
+            params
         ).fetchall()
     if not rows:
         return []

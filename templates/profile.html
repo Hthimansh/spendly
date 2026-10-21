@@ -21,6 +21,40 @@
             </div>
         </div>
 
+        <!-- Date filter bar -->
+        <div class="filter-bar">
+            <div class="filter-presets">
+                {% for preset in date_presets %}
+                <a href="{{ url_for('profile', **{'from': preset.date_from, 'to': preset.date_to}) }}"
+                   class="filter-pill{% if filter_from == preset.date_from and filter_to == preset.date_to %} active{% endif %}">
+                    {{ preset.label }}
+                </a>
+                {% endfor %}
+                <a href="{{ url_for('profile') }}"
+                   class="filter-pill{% if not filter_from and not filter_to %} active{% endif %}">
+                    All Time
+                </a>
+            </div>
+            <form class="filter-custom" method="GET" action="{{ url_for('profile') }}">
+                <div class="form-group">
+                    <label for="filter-from">From</label>
+                    <input type="date" id="filter-from" name="from" class="form-input" value="{{ filter_from }}">
+                </div>
+                <div class="form-group">
+                    <label for="filter-to">To</label>
+                    <input type="date" id="filter-to" name="to" class="form-input" value="{{ filter_to }}">
+                </div>
+                <button type="submit" class="btn-ghost">Apply</button>
+            </form>
+            <div class="filter-label">
+                {% if filter_from or filter_to %}
+                    Showing: {{ filter_from or "start" }} – {{ filter_to or "today" }}
+                {% else %}
+                    Showing: all time
+                {% endif %}
+            </div>
+        </div>
+
         <!-- Summary stats -->
         <div class="stats-row">
             <div class="stat-tile">
