@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, flash, redirect, url_for, abort, session
 from werkzeug.security import check_password_hash
-from database.db import get_db, init_db, seed_db, create_user, get_user_by_email
+from database.db import get_db, init_db, seed_db, create_user, get_user_by_email, add_expense as db_add_expense
 from database.queries import get_user_by_id, get_summary_stats, get_recent_transactions, get_category_breakdown
 import sqlite3
 from datetime import datetime, date, timedelta
@@ -12,6 +12,8 @@ def _parse_date(s):
         return s
     except (ValueError, TypeError):
         return None
+
+CATEGORIES = ["Food", "Transport", "Bills", "Health", "Entertainment", "Shopping", "Other"]
 
 app = Flask(__name__)
 app.secret_key = "dev-secret-change-in-prod"
@@ -157,9 +159,53 @@ def analytics():
     return render_template("analytics.html")
 
 
-@app.route("/expenses/add")
+@app.route("/expenses/add", methods=["GET", "POST"])
 def add_expense():
-    return "Add expense — coming in Step 7"
+    if not session.get("user_id"):
+        flash("Please sign in to add an expense.")
+        return redirect(url_for("login"))
+
+    if request.method == "GET":
+        return render_template("add_expense.html",
+                               categories=CATEGORIES,
+                               today=date.today().isoformat())
+
+    amount_raw  = request.form.get("amount", "").strip()
+    category    = request.form.get("category", "").strip()
+    date_raw    = request.form.get("date", "").strip()
+    description = request.form.get("description", "").strip()
+
+    errors = []
+    amount = None
+    try:
+        amount = float(amount_raw)
+        if amount <= 0:
+            raise ValueError
+    except (ValueError, TypeError):
+        errors.append("Amount must be a positive number.")
+
+    if category not in CATEGORIES:
+        errors.append("Please select a valid category.")
+
+    parsed_date = None
+    try:
+        datetime.strptime(date_raw, "%Y-%m-%d")
+        parsed_date = date_raw
+    except (ValueError, TypeError):
+        errors.append("Date must be a valid YYYY-MM-DD value.")
+
+    if errors:
+        for e in errors:
+            flash(e)
+        return render_template("add_expense.html",
+                               categories=CATEGORIES,
+                               today=date.today().isoformat(),
+                               form=request.form)
+
+    db_add_expense(session["user_id"], amount, category, parsed_date,
+                   description or None)
+    flash("Expense added.")
+    return redirect(url_for("profile"))
 
 
 @app.route("/expenses/<int:id>/edit")
