@@ -109,3 +109,8 @@ def update_expense(expense_id, amount, category, date, description):
             " WHERE id=?",
             (amount, category, date, description or None, expense_id),
         )
+
+
+def delete_expense(expense_id):
+    with get_db() as conn:
+        conn.execute("DELETE FROM expenses WHERE id = ?", (expense_id,))

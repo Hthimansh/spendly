@@ -1223,3 +1223,71 @@ a { color: inherit; text-decoration: none; }
     .wf-sidebar { display: none; }
     .wf-content { padding: 22px 16px; }
 }
+
+/* ------------------------------------------------------------------ */
+/* Danger button                                                        */
+/* ------------------------------------------------------------------ */
+
+.btn-danger {
+    background: var(--danger);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: .45rem 1rem;
+    font-size: .875rem;
+    font-family: inherit;
+    cursor: pointer;
+    line-height: 1;
+    transition: background 0.15s;
+}
+
+.btn-danger:hover {
+    background: #a93226;
+    color: #fff;
+}
+
+.btn-sm {
+    padding: .3rem .7rem;
+    font-size: .8rem;
+}
+
+/* ------------------------------------------------------------------ */
+/* Delete confirmation modal                                           */
+/* ------------------------------------------------------------------ */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .45);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-box {
+    background: var(--paper-card);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    padding: 2rem;
+    max-width: 360px;
+    width: 90%;
+    text-align: center;
+}
+
+.modal-msg {
+    font-size: 1.1rem;
+    margin-bottom: .5rem;
+    color: var(--ink);
+}
+
+.modal-sub {
+    font-size: .875rem;
+    color: var(--ink-muted);
+    margin-bottom: 1.5rem;
+}
+
+.modal-actions {
+    display: flex;
+    gap: .75rem;
+    justify-content: center;
+}

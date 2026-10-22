@@ -2,7 +2,8 @@ from flask import Flask, render_template, request, flash, redirect, url_for, abo
 from werkzeug.security import check_password_hash
 from database.db import (get_db, init_db, seed_db, create_user, get_user_by_email,
                          add_expense as db_add_expense,
-                         get_expense_by_id, update_expense as db_update_expense)
+                         get_expense_by_id, update_expense as db_update_expense,
+                         delete_expense as db_delete_expense)
 from database.queries import get_user_by_id, get_summary_stats, get_recent_transactions, get_category_breakdown
 import sqlite3
 from datetime import datetime, date, timedelta
@@ -264,9 +265,21 @@ def edit_expense(id):
     return redirect(url_for("profile"))
 
 
-@app.route("/expenses/<int:id>/delete")
+@app.route("/expenses/<int:id>/delete", methods=["POST"])
 def delete_expense(id):
-    return "Delete expense — coming in Step 9"
+    if not session.get("user_id"):
+        flash("Please sign in.")
+        return redirect(url_for("login"))
+
+    expense = get_expense_by_id(id)
+    if expense is None:
+        abort(404)
+    if expense["user_id"] != session["user_id"]:
+        abort(403)
+
+    db_delete_expense(id)
+    flash("Expense deleted.")
+    return redirect(url_for("profile"))
 
 
 if __name__ == "__main__":
