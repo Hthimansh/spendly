@@ -84,3 +84,12 @@ def create_user(name, email, password):
             "SELECT id FROM users WHERE email = ?", (email,)
         ).fetchone()
     return row["id"]
+
+
+def add_expense(user_id, amount, category, date, description):
+    with get_db() as conn:
+        conn.execute(
+            "INSERT INTO expenses (user_id, amount, category, date, description)"
+            " VALUES (?, ?, ?, ?, ?)",
+            (user_id, amount, category, date, description or None),
+        )

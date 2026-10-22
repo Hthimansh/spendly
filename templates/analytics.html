@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics — Spendly{% endblock %}
+
+{% block content %}
+<section class="analytics-section">
+    <div class="analytics-inner">
+        <div class="analytics-hero">
+
+            <!-- Left: copy + notify form -->
+            <div class="analytics-copy">
+                <p class="analytics-eyebrow">Coming soon</p>
+                <h1 class="analytics-title">Advanced Analytics</h1>
+                <p class="analytics-intro">
+                    We're working on powerful insights and visualisations to help you
+                    understand your spending patterns better.
+                </p>
+
+                <form class="analytics-form" id="analytics-form">
+                    <label for="analytics-email">Get early access</label>
+                    <div class="analytics-form-row">
+                        <input id="analytics-email" type="email" placeholder="you@example.com" required>
+                        <button type="submit">Notify me</button>
+                    </div>
+                    <p class="analytics-form-note">No spam. Just one email when we're ready.</p>
+                </form>
+
+                <div class="analytics-success" id="analytics-success" hidden>
+                    <span class="analytics-success-check">✓</span>
+                    You're on the list. We'll let you know when we launch.
+                </div>
+            </div>
+
+            <!-- Right: product wireframe mockup -->
+            <div class="analytics-wireframe" aria-label="Expense dashboard preview" aria-hidden="true">
+                <div class="wf-toolbar">
+                    <span class="wf-logo">S</span>
+                    <div class="wf-ph short"></div>
+                    <span class="wf-avatar"></span>
+                </div>
+                <div class="wf-body">
+                    <aside class="wf-sidebar">
+                        <div class="wf-ph medium dark"></div>
+                        <div class="wf-ph medium"></div>
+                        <div class="wf-ph short"></div>
+                        <div class="wf-ph medium"></div>
+                    </aside>
+                    <div class="wf-content">
+                        <div class="wf-content-heading">
+                            <div>
+                                <div class="wf-ph short"></div>
+                                <div class="wf-ph title"></div>
+                            </div>
+                            <span class="wf-add-btn">+ Add expense</span>
+                        </div>
+                        <div class="wf-cards">
+                            <div class="wf-card">
+                                <span>Total spent</span>
+                                <strong>₹2,840</strong>
+                                <div class="wf-ph medium"></div>
+                            </div>
+                            <div class="wf-card">
+                                <span>Budget left</span>
+                                <strong>₹1,160</strong>
+                                <div class="wf-ph short"></div>
+                            </div>
+                        </div>
+                        <div class="wf-chart">
+                            <div class="wf-chart-heading">
+                                <span>Monthly spending</span>
+                                <div class="wf-ph short"></div>
+                            </div>
+                            <div class="wf-bars">
+                                <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('analytics-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        this.hidden = true;
+        document.getElementById('analytics-success').hidden = false;
+    });
+</script>
+{% endblock %}
