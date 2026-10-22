@@ -25,7 +25,7 @@ def get_recent_transactions(user_id, date_from=None, date_to=None):
     where, params = _date_where(user_id, date_from, date_to)
     with get_db() as conn:
         rows = conn.execute(
-            f"SELECT date, description, category, amount "
+            f"SELECT id, date, description, category, amount "
             f"FROM expenses WHERE {where} ORDER BY date DESC",
             params
         ).fetchall()
@@ -33,6 +33,7 @@ def get_recent_transactions(user_id, date_from=None, date_to=None):
     for r in rows:
         d = datetime.strptime(r["date"], "%Y-%m-%d")
         result.append({
+            "id":          r["id"],
             "date":        d.strftime("%b %d"),
             "description": r["description"],
             "category":    r["category"],
