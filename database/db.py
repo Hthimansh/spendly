@@ -93,3 +93,19 @@ def add_expense(user_id, amount, category, date, description):
             " VALUES (?, ?, ?, ?, ?)",
             (user_id, amount, category, date, description or None),
         )
+
+
+def get_expense_by_id(expense_id):
+    with get_db() as conn:
+        return conn.execute(
+            "SELECT * FROM expenses WHERE id = ?", (expense_id,)
+        ).fetchone()
+
+
+def update_expense(expense_id, amount, category, date, description):
+    with get_db() as conn:
+        conn.execute(
+            "UPDATE expenses SET amount=?, category=?, date=?, description=?"
+            " WHERE id=?",
+            (amount, category, date, description or None, expense_id),
+        )
